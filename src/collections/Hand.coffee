@@ -29,12 +29,25 @@ class window.Hand extends Backbone.Collection
     [@minScore(), @minScore() + 10 * @hasAce()]
 
   endGame: (playerScores) ->
-    while @scores()[0] <= 16 then @hit()
+    keepHitting = true
+    while keepHitting
+      
+      if @hasAce() == true
+        if @scores()[1] < 17
+          @hit()
+        else
+          keepHitting = false
+      else
+        if @scores()[0] < 17
+          @hit()
+        else 
+          keepHitting = false
+
     playerScoreMin = playerScores[0]
     dealerScoreMin = @scores()[0]
     playerScoreMax = playerScores[1]
     dealerScoreMax = @scores()[1]
-    debugger
+    
 
     #check for player busted
     if playerScoreMin > 21 then playerScoreMin = 0
@@ -45,3 +58,4 @@ class window.Hand extends Backbone.Collection
     if dealerScoreMax > 21 then dealerScore = dealerScoreMin else dealerScore = dealerScoreMax
 
     @trigger("gameOver", playerScore > dealerScore)
+    playerScore > dealerScore

@@ -5,7 +5,16 @@ class window.HandView extends Backbone.View
 
   initialize: ->
     @collection.on 'add remove change', => @render()
-    @collection.on "gameOver",(result) -> if !!result then $(".win-result").show() else $(".lose-result").show()
+    context = @
+    @collection.on "gameOver", (result) ->
+      if !!result
+        $(".win-result").show()
+        
+        context.updateButtons()
+      else
+        $(".lose-result").show()
+        
+        context.updateButtons()
     @render()
 
   render: ->
@@ -13,9 +22,9 @@ class window.HandView extends Backbone.View
     @$el.html @template @collection
     @$el.append @collection.map (card) ->
       new CardView(model: card).$el
-    @$('.score').text @collection.scores()[0]
-    if @collection.scores()[1] == 21 then @$('.score').text('21')
-    if @collection.scores()[0] > 21 then @busted()
+    @$('.score').text @collection.scores()[1]
+    if @collection.scores()[1] > 21 then @$('.score').text @collection.scores()[0]
+    if @collection.scores()[0] > 21 then return @busted()
     if @collection.scores()[0] == 21 or @collection.scores()[1] == 21 then @blackJack()
 
   busted: ->
@@ -27,11 +36,15 @@ class window.HandView extends Backbone.View
     @endGame('win')
 
   endGame: (result) ->
-    if result == 'lose' and !@isDealer then $(".lose-result").show()
-    else if result == 'win' and !@isDealer then $(".win-result").show()
-    else if result == 'lose' and @isDealer then $(".win-result").show()
-    else if result == 'win' and @isDealer then $(".lose-result").show()
+    console.log(@collection)
+    if result == 'lose' and !@collection.isDealer then $(".lose-result").show()
+    else if result == 'win' and !@collection.isDealer then $(".win-result").show()
+    else if result == 'lose' and @collection.isDealer then $(".win-result").show()
+    else if result == 'win' and @collection.isDealer then $(".lose-result").show()
+    @updateButtons()
+    result
+
+  updateButtons: ->
     $(".hit-button").hide()
     $(".stand-button").hide()
     $(".new-deal-button").show()
-
